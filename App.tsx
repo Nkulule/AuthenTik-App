@@ -7,13 +7,14 @@ import { AiAssistant } from './components/AiAssistant';
 import { MediaWorkbench } from './components/MediaWorkbench';
 import { LiveInterviewStudio } from './components/LiveInterviewStudio';
 import { Post, UserRole, ContentType, VerificationStatus } from './types';
-import { Shield, Search, TrendingUp, Info, Users, Sparkles, Brain, Radio, CheckCircle2 } from 'lucide-react';
+import { Shield, Sparkles, Radio } from 'lucide-react';
 import { BrandIcon } from './components/BrandIcon';
 
 const INITIAL_POSTS: Post[] = [
   {
     id: '1',
     author: "Dr. Sarah Chen",
+    authorAvatar: "https://i.pravatar.cc/150?u=sarahchen",
     authorRole: UserRole.EXPERT,
     type: ContentType.RESEARCH,
     title: "New Analysis of Deep-Sea Thermal Patterns: Evidence of Rapid Warming",
@@ -35,14 +36,23 @@ const INITIAL_POSTS: Post[] = [
 const App: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [activeTab, setActiveTab] = useState<'feed' | 'lab' | 'studio'>('feed');
+  const [userProfile, setUserProfile] = useState({
+    name: "Alex Thompson",
+    role: "Journalist Rank Tier II",
+    avatar: null as string | null
+  });
 
   const handleNewPost = (newPost: Post) => {
     setPosts([newPost, ...posts]);
   };
 
+  const handleAvatarChange = (newAvatar: string) => {
+    setUserProfile(prev => ({ ...prev, avatar: newAvatar }));
+  };
+
   return (
     <div className="min-h-screen">
-      <Sidebar />
+      <Sidebar userProfile={userProfile} onAvatarChange={handleAvatarChange} />
       
       <main className="lg:ml-64 pb-24 lg:pb-0">
         <div className="max-w-7xl mx-auto px-4 py-8 lg:px-12">
@@ -57,7 +67,7 @@ const App: React.FC = () => {
                   {activeTab === 'feed' ? 'Truth Feed' : activeTab === 'lab' ? 'AuthenTik AI Lab' : 'Live Studio'}
                 </h1>
                 <p className="text-sm text-slate-500 font-medium flex items-center gap-1.5 mt-1">
-                  <Shield size={14} className="text-emerald-500" />
+                  <Shield size={14} className="text-blue-500" />
                   The global standard for authenticated information.
                 </p>
               </div>
@@ -89,16 +99,16 @@ const App: React.FC = () => {
             <div className="lg:col-span-8">
               {activeTab === 'feed' && (
                 <div className="space-y-8">
-                  <CreatePost onPostCreated={handleNewPost} />
+                  <CreatePost onPostCreated={handleNewPost} userAvatar={userProfile.avatar} />
                   <div className="space-y-6">
                     {posts.map(post => (
-                      <PostCard key={post.id} post={post} />
+                      <PostCard key={post.id} post={post} currentUserAvatar={userProfile.avatar} />
                     ))}
                   </div>
                 </div>
               )}
 
-              {activeTab === 'lab' && (
+              {activeTab === 'lab' && (activeTab === 'lab') && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <AiAssistant />
                   <MediaWorkbench />
@@ -114,7 +124,7 @@ const App: React.FC = () => {
 
             <aside className="hidden lg:block lg:col-span-4 space-y-8">
               <div className="bg-white rounded-3xl border border-slate-200 p-8 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-colors duration-500" />
+                <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors duration-500" />
                 
                 <div className="flex items-center gap-3 mb-6 relative">
                   <div className="p-2 bg-amber-50 rounded-xl">
@@ -126,7 +136,7 @@ const App: React.FC = () => {
                 <div className="space-y-4 relative">
                   <div className="p-4 bg-slate-50/80 rounded-2xl flex justify-between items-center border border-slate-100">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Global Precision</span>
-                    <span className="text-sm font-black text-emerald-600">99.4%</span>
+                    <span className="text-sm font-black text-blue-600">99.4%</span>
                   </div>
                   <div className="p-4 bg-slate-50/80 rounded-2xl flex justify-between items-center border border-slate-100">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Daily Verifications</span>
@@ -162,12 +172,12 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-6 bg-emerald-50/50 rounded-3xl border border-emerald-100/50">
+              <div className="p-6 bg-blue-50/50 rounded-3xl border border-blue-100/50">
                  <div className="flex items-center gap-3 mb-3">
-                   <Shield className="text-emerald-600" size={18} />
-                   <h5 className="text-xs font-black text-emerald-900 uppercase tracking-widest">Veritas Protocol</h5>
+                   <Shield className="text-blue-600" size={18} />
+                   <h5 className="text-xs font-black text-blue-900 uppercase tracking-widest">Veritas Protocol</h5>
                  </div>
-                 <p className="text-[11px] text-emerald-800/70 font-medium leading-relaxed">
+                 <p className="text-[11px] text-blue-800/70 font-medium leading-relaxed">
                    Every piece of media on AuthenTik is cryptographically hashed and anchored to the Truth Chain. 100% accountability, 0% propaganda.
                  </p>
               </div>
@@ -176,7 +186,7 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      <MobileNav />
+      <MobileNav userAvatar={userProfile.avatar} />
     </div>
   );
 };

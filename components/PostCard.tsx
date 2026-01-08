@@ -4,7 +4,7 @@ import { Post, VerificationStatus, UserRole, Comment } from '../types';
 import { 
   ShieldCheck, Info, PlayCircle, History, 
   ExternalLink, CheckCircle2, Share2, MessageSquare, 
-  X, Link, Download, Send, Heart, Eye, Check, UserCheck
+  X, Link, Download, Send, Heart, Eye, Check, UserCheck, User
 } from 'lucide-react';
 
 const StatusBadge: React.FC<{ status: VerificationStatus }> = ({ status }) => {
@@ -17,14 +17,14 @@ const StatusBadge: React.FC<{ status: VerificationStatus }> = ({ status }) => {
   };
 
   return (
-    <span className={`px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1.5 ${config[status]}`}>
+    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5 ${config[status]}`}>
       {status === VerificationStatus.VERIFIED && <ShieldCheck size={14} />}
       {status}
     </span>
   );
 };
 
-export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
+export const PostCard: React.FC<{ post: Post, currentUserAvatar: string | null }> = ({ post, currentUserAvatar }) => {
   const [showLogs, setShowLogs] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -55,6 +55,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     const comment: Comment = {
       id: Math.random().toString(36).substr(2, 9),
       author: "Alex Thompson", 
+      authorAvatar: currentUserAvatar || undefined,
       authorRole: UserRole.JOURNALIST,
       content: newComment,
       timestamp: "Just now"
@@ -94,131 +95,143 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   ];
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6 transition-all hover:shadow-md relative">
+    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mb-8 transition-all hover:shadow-xl hover:shadow-slate-200/50 relative group/card">
       {showToast && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[110] bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-2xl animate-in fade-in slide-in-from-top-4">
-          <Check size={14} className="text-emerald-400" />
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[110] bg-slate-900 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 shadow-2xl animate-in fade-in slide-in-from-top-4">
+          <Check size={16} className="text-blue-400" />
           Verified Link Copied
         </div>
       )}
 
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
-              {post.author[0]}
+      <div className="p-8">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 font-bold overflow-hidden shadow-sm">
+              {post.authorAvatar ? (
+                <img src={post.authorAvatar} alt={post.author} className="w-full h-full object-cover" />
+              ) : (
+                post.author[0]
+              )}
             </div>
             <div>
-              <h4 className="font-semibold text-slate-900 flex items-center gap-1.5">
+              <h4 className="font-black text-slate-900 flex items-center gap-2">
                 {post.author}
-                <CheckCircle2 size={14} className="text-blue-500" />
+                <CheckCircle2 size={16} className="text-blue-500" />
               </h4>
-              <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{post.authorRole}</p>
+              <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{post.authorRole}</p>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
             <StatusBadge status={post.status} />
             {post.replyConfirmed && (
-              <span className="px-2 py-0.5 rounded bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm animate-in fade-in zoom-in-95">
-                <UserCheck size={10} /> Verified Response Included
+              <span className="px-3 py-1 rounded bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 animate-in fade-in zoom-in-95">
+                <UserCheck size={12} /> Verified Response Included
               </span>
             )}
           </div>
         </div>
 
-        <div className="mb-4">
-          <p className="text-xs text-slate-400 font-medium uppercase tracking-widest mb-1">{post.type}</p>
-          <h2 className="text-2xl font-serif font-bold text-slate-900 leading-tight mb-3">
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{post.type}</p>
+          </div>
+          <h2 className="text-2xl font-serif font-bold text-slate-900 leading-tight mb-4 group-hover/card:text-blue-600 transition-colors">
             {post.title}
           </h2>
-          <p className="text-slate-700 leading-relaxed line-clamp-3">
+          <p className="text-slate-600 leading-relaxed font-medium">
             {post.content}
           </p>
         </div>
 
         {post.interviewUrl && (
-          <div className="mb-4 aspect-video bg-slate-900 rounded-lg relative group cursor-pointer overflow-hidden ring-1 ring-slate-200">
+          <div className="mb-6 aspect-video bg-slate-900 rounded-3xl relative group cursor-pointer overflow-hidden ring-1 ring-slate-200">
             <img 
               src={`https://picsum.photos/seed/${post.id}/800/450`} 
-              className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform" 
+              className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" 
               alt="Interview preview"
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <PlayCircle size={64} className="text-white opacity-90 group-hover:scale-110 transition-transform" />
+              <div className="w-20 h-20 bg-white/10 backdrop-blur rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <PlayCircle size={64} className="text-white opacity-90" />
+              </div>
             </div>
-            <div className="absolute bottom-4 left-4">
-              <span className="bg-red-600 text-white text-[10px] px-2 py-1 rounded font-bold uppercase tracking-widest">Live Verified Recording</span>
+            <div className="absolute bottom-6 left-6">
+              <span className="bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-black uppercase tracking-widest flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                Live Verified Recording
+              </span>
             </div>
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-8">
           {post.sources.map((s, i) => (
-            <div key={i} className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 text-slate-600 rounded-md text-xs border border-slate-100">
-              <ExternalLink size={12} /> {s}
+            <div key={i} className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-100 hover:border-slate-300 transition-colors cursor-default">
+              <ExternalLink size={12} className="text-blue-500" /> {s}
             </div>
           ))}
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex flex-wrap justify-between items-center gap-y-3">
-          <div className="flex flex-wrap gap-4">
+        <div className="pt-6 border-t border-slate-100 flex flex-wrap justify-between items-center gap-y-4">
+          <div className="flex flex-wrap gap-6">
             <button 
               onClick={handleLike}
-              className={`text-sm font-medium flex items-center gap-1.5 transition-all duration-200 ${liked ? 'text-rose-600 scale-105' : 'text-slate-500 hover:text-slate-900'}`}
+              className={`text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all duration-300 ${liked ? 'text-rose-600 scale-105' : 'text-slate-500 hover:text-slate-900'}`}
             >
-              <Heart size={18} fill={liked ? "currentColor" : "none"} />
+              <Heart size={20} fill={liked ? "currentColor" : "none"} className={liked ? "animate-bounce" : ""} />
               {likeCount}
             </button>
-            <div className="text-sm font-medium flex items-center gap-1.5 text-slate-500">
-              <Eye size={18} />
+            <div className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
+              <Eye size={20} />
               {formatNumber(post.views)}
             </div>
             <button 
               onClick={() => setShowComments(!showComments)}
-              className={`text-sm font-medium flex items-center gap-1.5 transition-colors ${showComments ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
+              className={`text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${showComments ? 'text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
             >
-              <MessageSquare size={18} />
+              <MessageSquare size={20} />
               Discourse ({comments.length})
             </button>
             <button 
               onClick={() => setShowLogs(!showLogs)}
-              className={`text-sm font-medium flex items-center gap-1.5 transition-colors ${showLogs ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
+              className={`text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${showLogs ? 'text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
             >
-              <History size={18} />
-              Audit Trail
+              <History size={20} />
+              Audit
             </button>
             <button 
               onClick={() => setShowShareModal(true)}
-              className="text-slate-500 hover:text-slate-900 text-sm font-medium flex items-center gap-1.5 transition-colors"
+              className="text-slate-500 hover:text-slate-900 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-colors"
             >
-              <Share2 size={18} />
+              <Share2 size={20} />
               Share
             </button>
           </div>
-          <span className="text-xs text-slate-400 font-medium">{post.timestamp}</span>
+          <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{post.timestamp}</span>
         </div>
 
         {showLogs && (
-          <div className="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200 animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center justify-between mb-4">
-              <h5 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                <ShieldCheck size={14} className="text-emerald-500" />
-                Information Integrity Audit
+          <div className="mt-8 p-6 bg-slate-50/80 rounded-3xl border border-slate-100 animate-in fade-in slide-in-from-top-4">
+            <div className="flex items-center justify-between mb-6">
+              <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-3">
+                <ShieldCheck size={16} className="text-blue-500" />
+                Cryptographic Integrity Audit
               </h5>
               {post.replyConfirmed && (
-                <div className="flex items-center gap-1 text-[10px] text-indigo-600 font-bold uppercase tracking-tighter">
-                  <UserCheck size={12} /> Right of Reply Logged
+                <div className="flex items-center gap-1.5 text-[9px] text-indigo-600 font-black uppercase tracking-widest">
+                  <UserCheck size={14} /> Right of Reply Logged
                 </div>
               )}
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {post.auditTrail.map((log) => (
-                <div key={log.id} className="flex gap-3 border-l-2 border-slate-200 ml-1.5 pl-4 relative">
-                  <div className={`absolute -left-[5px] top-1.5 w-2 h-2 rounded-full ${log.step.includes('Reply') ? 'bg-indigo-500' : 'bg-slate-300'}`} />
+                <div key={log.id} className="flex gap-4 border-l-2 border-slate-200 ml-1.5 pl-6 relative">
+                  <div className={`absolute -left-[5px] top-1.5 w-2 h-2 rounded-full ring-4 ring-white ${log.step.includes('Reply') ? 'bg-indigo-500' : 'bg-blue-500'}`} />
                   <div>
-                    <p className="text-sm font-bold text-slate-800">{log.step}</p>
-                    <p className="text-[10px] text-slate-400 mb-1">{log.timestamp} • {log.actor}</p>
-                    <p className="text-xs text-slate-600 leading-relaxed italic">{log.details}</p>
+                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{log.step}</p>
+                    <p className="text-[10px] text-slate-400 font-bold mb-2 uppercase tracking-widest">{log.timestamp} • {log.actor}</p>
+                    <p className="text-xs text-slate-600 leading-relaxed font-medium bg-white/50 p-3 rounded-xl border border-slate-100/50 italic">{log.details}</p>
                   </div>
                 </div>
               ))}
@@ -227,77 +240,88 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
         )}
 
         {showComments && (
-          <div className="mt-6 border-t border-slate-100 pt-6 animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center justify-between mb-6">
-              <h5 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                <MessageSquare size={14} />
-                Verified Discourse
+          <div className="mt-8 border-t border-slate-100 pt-8 animate-in fade-in slide-in-from-top-4">
+            <div className="flex items-center justify-between mb-8">
+              <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-3">
+                <MessageSquare size={16} />
+                Verified Community Discourse
               </h5>
-              <div className="flex items-center gap-2 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-                <ShieldCheck size={10} className="text-emerald-600" />
-                <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">
+              <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 shadow-sm shadow-blue-500/5">
+                <ShieldCheck size={14} className="text-blue-600" />
+                <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">
                   Identity Authenticated Area
                 </span>
               </div>
             </div>
             
-            <div className="space-y-6 mb-8">
+            <div className="space-y-8 mb-10">
               {comments.length > 0 ? comments.map((comment) => (
-                <div key={comment.id} className="flex gap-3 group">
-                  <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 font-bold shrink-0 border border-slate-200 relative">
-                    {comment.author[0]}
-                    <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm border border-slate-100">
+                <div key={comment.id} className="flex gap-4 group/comment">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-500 font-bold shrink-0 border border-slate-200 relative overflow-hidden shadow-sm group-hover/comment:shadow-md transition-shadow">
+                    {comment.authorAvatar ? (
+                      <img src={comment.authorAvatar} alt={comment.author} className="w-full h-full object-cover" />
+                    ) : (
+                      comment.author[0]
+                    )}
+                    <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-md border border-slate-100">
                       <CheckCircle2 size={12} className="text-blue-500" />
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
-                      <span className="text-sm font-bold text-slate-900">{comment.author}</span>
-                      <span className="text-[9px] px-2 py-0.5 bg-slate-100 text-slate-500 rounded font-bold uppercase tracking-tight border border-slate-200">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2">
+                      <span className="text-sm font-black text-slate-900 uppercase tracking-tight">{comment.author}</span>
+                      <span className="text-[8px] px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md font-black uppercase tracking-widest border border-slate-200 shadow-sm">
                         {comment.authorRole}
                       </span>
-                      <span className="text-[10px] text-slate-400 ml-auto">{comment.timestamp}</span>
+                      <span className="text-[9px] text-slate-400 ml-auto font-black uppercase tracking-widest">{comment.timestamp}</span>
                     </div>
-                    <div className="bg-slate-50 p-4 rounded-2xl rounded-tl-none border border-slate-100 group-hover:bg-slate-100/50 transition-colors">
-                      <p className="text-sm text-slate-700 leading-relaxed">{comment.content}</p>
+                    <div className="bg-slate-50/50 p-5 rounded-3xl rounded-tl-none border border-slate-100 group-hover/comment:bg-white group-hover/comment:shadow-xl group-hover/comment:shadow-slate-200/50 transition-all">
+                      <p className="text-sm text-slate-700 leading-relaxed font-medium">{comment.content}</p>
                     </div>
                   </div>
                 </div>
               )) : (
-                <div className="text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                  <MessageSquare size={32} className="text-slate-300 mx-auto mb-3" />
-                  <p className="text-sm text-slate-400 font-medium">No verified contributions yet.</p>
+                <div className="text-center py-12 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200">
+                  <MessageSquare size={40} className="text-slate-300 mx-auto mb-4" />
+                  <p className="text-xs text-slate-400 font-black uppercase tracking-widest">No verified contributions yet.</p>
                 </div>
               )}
             </div>
 
-            <form onSubmit={handleAddComment} className="pt-6 border-t border-slate-100">
+            <form onSubmit={handleAddComment} className="pt-8 border-t border-slate-100">
               <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold shrink-0 shadow-lg shadow-slate-900/10 border-2 border-white ring-1 ring-slate-900/5">
-                  A
+                <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0 shadow-xl shadow-slate-900/20 border-2 border-white overflow-hidden ring-1 ring-slate-200">
+                  {currentUserAvatar ? (
+                    <img src={currentUserAvatar} alt="You" className="w-full h-full object-cover" />
+                  ) : (
+                    'A'
+                  )}
                 </div>
-                <div className="flex-1 space-y-3">
-                  <div className="relative">
+                <div className="flex-1 space-y-4">
+                  <div className="relative group/input">
                     <textarea 
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Add a verified contribution to this information..." 
                       rows={3}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5 transition-all resize-none placeholder:text-slate-400 focus:bg-white"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-3xl px-6 py-4 text-sm font-medium focus:outline-none focus:ring-8 focus:ring-blue-500/5 transition-all resize-none placeholder:text-slate-400 focus:bg-white focus:border-blue-200"
                     />
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                     <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Authenticated User:</span>
-                        <span className="text-[10px] font-bold text-slate-700 px-2 py-0.5 bg-slate-100 rounded">Alex Thompson (Journalist II)</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                     <div className="flex items-center gap-3">
+                        <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest">Identity:</span>
+                        <div className="flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-xl shadow-sm">
+                           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                           <span className="text-[9px] font-black text-slate-700 uppercase tracking-widest">Alex Thompson (Journalist II)</span>
+                        </div>
                      </div>
                      <button 
                       type="submit"
                       disabled={!newComment.trim()}
-                      className="flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 disabled:opacity-30 transition-all shadow-md active:scale-95"
+                      className="flex items-center justify-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 disabled:opacity-30 transition-all shadow-xl shadow-slate-900/10 active:scale-95"
                     >
-                      <Send size={14} />
-                      Post Verified Discourse
+                      <Send size={16} />
+                      Publish Discourse
                     </button>
                   </div>
                 </div>
@@ -308,20 +332,20 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
       </div>
 
       {showShareModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl animate-in fade-in duration-500">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300 border border-white/20">
+            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Share Verification</h3>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Authenticated Sharing</p>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Share Record</h3>
+                <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1">Authenticated Verification</p>
               </div>
-              <button onClick={() => setShowShareModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600">
-                <X size={20} />
+              <button onClick={() => setShowShareModal(false)} className="p-3 hover:bg-slate-200 rounded-2xl transition-all text-slate-400 hover:text-slate-900">
+                <X size={24} />
               </button>
             </div>
             
-            <div className="p-3">
-              <div className="grid grid-cols-1 gap-1">
+            <div className="p-4">
+              <div className="space-y-2">
                 {shareOptions.map((option, idx) => (
                   <button 
                     key={idx}
@@ -329,29 +353,29 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                       option.action();
                       setShowShareModal(false);
                     }}
-                    className="flex items-center gap-4 px-4 py-4 hover:bg-slate-50 rounded-xl transition-all text-slate-700 group border border-transparent hover:border-slate-100 text-left"
+                    className="w-full flex items-center gap-5 px-6 py-5 hover:bg-slate-50 rounded-3xl transition-all text-slate-700 group border border-transparent hover:border-slate-200 text-left active:scale-[0.98]"
                   >
-                    <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-white transition-colors group-hover:shadow-sm">
-                      <span className="text-slate-500 group-hover:text-slate-900">
+                    <div className="w-12 h-12 flex items-center justify-center bg-slate-100 rounded-2xl group-hover:bg-white transition-all group-hover:shadow-lg group-hover:scale-110">
+                      <span className="text-slate-500 group-hover:text-blue-600">
                         {option.icon}
                       </span>
                     </div>
                     <div>
-                      <p className="font-bold text-sm text-slate-900 leading-none mb-1">{option.name}</p>
-                      <p className="text-xs text-slate-400">{option.desc}</p>
+                      <p className="font-black text-sm text-slate-900 uppercase tracking-tight mb-1">{option.name}</p>
+                      <p className="text-[10px] text-slate-500 font-medium">{option.desc}</p>
                     </div>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="p-5 bg-slate-50 flex items-center gap-3 border-t border-slate-100">
-               <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                 <ShieldCheck size={18} className="text-emerald-600" />
+            <div className="p-8 bg-slate-50/80 flex items-center gap-4 border-t border-slate-100 backdrop-blur-sm">
+               <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+                 <ShieldCheck size={24} className="text-emerald-500" />
                </div>
                <div className="overflow-hidden">
-                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Cid Verification Key</p>
-                 <p className="text-[9px] font-mono text-slate-400 truncate">vrt_{post.id}_hash_0x8f23...a3e9</p>
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-2">Cryptographic Hash</p>
+                 <p className="text-[9px] font-mono text-slate-500 truncate bg-slate-200/50 px-2 py-1 rounded">vrt_{post.id}_hash_0x8f23...a3e9</p>
                </div>
             </div>
           </div>

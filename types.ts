@@ -34,6 +34,7 @@ export interface VerificationLog {
 export interface Comment {
   id: string;
   author: string;
+  authorAvatar?: string;
   authorRole: UserRole;
   content: string;
   timestamp: string;
@@ -42,6 +43,7 @@ export interface Comment {
 export interface Post {
   id: string;
   author: string;
+  authorAvatar?: string;
   authorRole: UserRole;
   type: ContentType;
   title: string;
