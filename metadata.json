@@ -1,0 +1,8 @@
+{
+  "name": "AuthenTik - Verified Information Platform",
+  "description": "A next-generation social media platform focused on eliminating fake news through rigorous verification, real identity, and transparent journalistic ethics.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
